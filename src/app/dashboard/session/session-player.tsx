@@ -120,7 +120,11 @@ export function SessionPlayer({
   useEffect(() => {
     function createPlayer() {
       playerRef.current = new window.YT.Player("youtube-player", {
-        videoId: initialVideoId ?? undefined,
+        // videoIdキーを省略することで、YouTube側のデフォルト値(空文字)を維持する。
+        // ここで videoId: undefined を渡すと Object.assign でデフォルトの ""
+        // が undefined に上書きされ、widget側のID検証で "Invalid video id" が
+        // throwされる。
+        ...(initialVideoId ? { videoId: initialVideoId } : {}),
         playerVars: { autoplay: 0, controls: 1, rel: 0 },
         events: {
           onReady: () => setIsReady(true),
