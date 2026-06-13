@@ -144,6 +144,21 @@ export function ParticipantView({
   async function handleSelectTrack(track: TrackResult) {
     setIsSearchOpen(false);
     const supabase = createClient();
+    const anonymousId = getAnonymousId();
+
+    const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString();
+    const { count } = await supabase
+      .from("requests")
+      .select("id", { count: "exact", head: true })
+      .eq("session_id", sessionId)
+      .eq("requested_by", anonymousId)
+      .gte("created_at", fiveMinutesAgo);
+
+    if ((count ?? 0) >= 3) {
+      setMessage("リクエストは5分間に3曲までです。しばらく待ってから試してください");
+      return;
+    }
+
     const { error } = await supabase.from("requests").insert({
       session_id: sessionId,
       spotify_track_id: track.videoId,
@@ -151,7 +166,7 @@ export function ParticipantView({
       artist_name: track.channelTitle,
       album_art_url: track.thumbnailUrl,
       duration_ms: 0,
-      requested_by: getAnonymousId(),
+      requested_by: anonymousId,
       video_id: track.videoId,
       thumbnail_url: track.thumbnailUrl,
     });

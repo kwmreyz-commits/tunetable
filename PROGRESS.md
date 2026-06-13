@@ -2,13 +2,14 @@
 
 ## ステータス概要
 
-**ステップ1〜5'は完了済み。次のタスクはステップ6'(投票機能の仕上げ: 5分3曲のレート制限、ホスト側でのキュー削除機能)。**
+**ステップ1〜6'はすべて完了済み。v2仕様のコア機能(ホスト/参加者フロー)は一通り実装完了。**
 
 - ステップ1・2: 完了(プロジェクト基盤・DBスキーマ、ホスト account登録/ログイン)
 - ステップ3: Spotify版は破棄。YouTube版(ステップ3')に変更し、実装完了。
 - ステップ3'(YouTube動画検索): 完了
 - ステップ4'(参加者側ページ更新): 完了
 - ステップ5'(再生ページ): 完了
+- ステップ6'(投票機能の仕上げ: レート制限・ホストのキュー削除): 完了
 - マイグレーション 0001〜0005 はすべてSupabaseに適用済み
 
 ## 完了したステップ
@@ -92,9 +93,20 @@
   - `session_stores`ビューがanonから正しくホスト名を返すことを確認
   - テストデータは削除済み
 
-## 次のステップ: ステップ6' (投票機能の仕上げ)
+## 完了: ステップ6' (投票機能の仕上げ)
 
-未着手。以下の2点を実装する。
+- `src/app/s/[join_code]/participant-view.tsx`: `handleSelectTrack`内でリクエスト追加前にレート制限チェックを追加
+  - 同一匿名ID(`requested_by`)・同一セッションで、過去5分以内の`requests`件数を`count: "exact", head: true`で取得
+  - 件数が3以上ならinsertせず「リクエストは5分間に3曲までです。しばらく待ってから試してください」を表示
+- `src/app/dashboard/session/session-player.tsx`: キュー一覧の各項目に「削除」ボタンを追加
+  - クリックで`requests.status`を`"removed"`に更新(`removeFromQueue`)し、`refreshQueue()`で再取得。RLSの「store owners can manage requests of own sessions」ポリシーでホストのみ更新可能
+- 検証: `tsc`/`eslint`/`npm run build`成功。devサーバーを起動し、テスト用ホスト・セッション(join_code: K8LGHP)を作成して以下を確認:
+  - 同一匿名IDで3件の`requests`をinsert後、レート制限チェックと同じ条件のカウントクエリが`3`を返すことを確認(4件目はブロックされる挙動)
+  - 別の匿名IDでは件数`0`(制限なし)であることを確認
+  - ホストのJWTで`requests.status`を`"removed"`に更新できること、更新後はキュー一覧(`status=queued`)から除外されることを確認
+  - `/s/K8LGHP`(参加者ページ)・`/dashboard/session`(再生ページ)がともに200で正常にレンダリングされ、新規追加した文言・削除ボタンがビルド済みバンドルに含まれることを確認
+  - テストデータ(テストユーザー)は削除済み
 
-1. **レート制限**: 同一匿名ID(`anonymous-id.ts`で発行するUUID)からのリクエストを、5分間に3曲までに制限する。参加者ページ(`participant-view.tsx`の`handleSelectTrack`)でリクエスト追加前にチェックする想定。
-2. **ホストからのキュー削除機能**: 再生ページ(`session-player.tsx`のキュー一覧)に削除ボタンを追加し、`requests.status`を`"removed"`に更新できるようにする(`RequestStatus`型には`"removed"`が既に定義済み)。
+## 次のステップ
+
+ステップ6'まででv2仕様のコア機能は完成。今後の拡張は[bgm-request-app-spec-v2.md](./bgm-request-app-spec-v2.md)を参照して検討する(例: NGワード/露骨表現フィルタ、セッション終了時のキュー整理、複数音楽プロバイダ対応など)。

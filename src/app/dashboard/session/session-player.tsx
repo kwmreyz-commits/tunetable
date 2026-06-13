@@ -169,6 +169,12 @@ export function SessionPlayer({
     };
   }, [sessionId, refreshQueue]);
 
+  async function removeFromQueue(requestId: string) {
+    const supabase = createClient();
+    await supabase.from("requests").update({ status: "removed" }).eq("id", requestId);
+    await refreshQueue();
+  }
+
   function handleStart() {
     if (initialVideoId) {
       playerRef.current?.playVideo();
@@ -232,6 +238,13 @@ export function SessionPlayer({
                 <p className="truncate text-xs text-zinc-500">{item.artist_name}</p>
               </div>
               <span className="text-sm font-medium text-zinc-700">{item.voteCount}票</span>
+              <button
+                type="button"
+                onClick={() => removeFromQueue(item.id)}
+                className="rounded-full border border-zinc-300 px-3 py-1 text-xs font-medium text-zinc-500"
+              >
+                削除
+              </button>
             </li>
           ))}
         </ul>
