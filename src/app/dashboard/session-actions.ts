@@ -26,6 +26,12 @@ export async function startSession() {
     redirect("/dashboard");
   }
 
+  await supabase
+    .from("sessions")
+    .update({ status: "ended", ended_at: new Date().toISOString() })
+    .eq("store_id", store.id)
+    .eq("status", "active");
+
   for (let attempt = 0; attempt < 5; attempt++) {
     const { error } = await supabase
       .from("sessions")

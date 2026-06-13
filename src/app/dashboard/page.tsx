@@ -12,12 +12,14 @@ export default async function DashboardPage() {
     .eq("owner_user_id", userData.user!.id)
     .single();
 
-  const { data: activeSession } = await supabase
+  const { data: activeSessions } = await supabase
     .from("sessions")
     .select("id, join_code")
     .eq("store_id", store!.id)
     .eq("status", "active")
-    .maybeSingle();
+    .order("started_at", { ascending: false })
+    .limit(1);
+  const activeSession = activeSessions?.[0] ?? null;
 
   return (
     <div className="flex flex-1 flex-col px-6 py-12">

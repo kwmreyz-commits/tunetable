@@ -12,12 +12,14 @@ export default async function SessionPage() {
     .eq("owner_user_id", userData.user!.id)
     .single();
 
-  const { data: session } = await supabase
+  const { data: sessions } = await supabase
     .from("sessions")
     .select("id, join_code, now_playing_video_id")
     .eq("store_id", store!.id)
     .eq("status", "active")
-    .maybeSingle();
+    .order("started_at", { ascending: false })
+    .limit(1);
+  const session = sessions?.[0] ?? null;
 
   if (!session) {
     redirect("/dashboard");
