@@ -1,26 +1,126 @@
 @import "tailwindcss";
 
+/*
+ * TuneTable "Dark Stage" テーマ
+ * 暗い部屋のテレビ/スマホで見る前提のため、ライトモードは用意しない。
+ * 設計の根拠は DESIGN.md を参照。
+ */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --stage: #0a0711;
+  --stage-raised: #130d1e;
+  --surface: rgba(255, 255, 255, 0.06);
+  --surface-strong: rgba(255, 255, 255, 0.11);
+  --hairline: rgba(255, 255, 255, 0.1);
+
+  --ink: #f5f2fa;
+  --ink-muted: #a79fba;
+  --ink-faint: #6f6683;
+
+  --accent: #a855f7;
+  --accent-soft: #c084fc;
+  --accent-alt: #ec4899;
+  --danger: #fb7185;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-stage: var(--stage);
+  --color-stage-raised: var(--stage-raised);
+  --color-surface: var(--surface);
+  --color-surface-strong: var(--surface-strong);
+  --color-hairline: var(--hairline);
+  --color-ink: var(--ink);
+  --color-ink-muted: var(--ink-muted);
+  --color-ink-faint: var(--ink-faint);
+  --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
+  --color-accent-alt: var(--accent-alt);
+  --color-danger: var(--danger);
+
+  /* Geistは日本語グリフを持たないため、OS標準のゴシック体にフォールバックさせる。
+     v2では body の font-family: Arial がこの変数を上書きしていて、
+     指定したフォントが一切効いていなかった。 */
+  --font-sans: var(--font-geist-sans), "Hiragino Kaku Gothic ProN", "Hiragino Sans",
+    "Noto Sans JP", "Yu Gothic UI", "Yu Gothic", Meiryo, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  color-scheme: dark;
+  background: var(--stage);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--stage);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  /* iOSでバウンススクロールしたときに白地が見えないようにする */
+  overscroll-behavior-y: none;
+}
+
+/* 暗所ではデフォルトのフォーカスリングが見えにくいので明示的に強調する */
+:focus-visible {
+  outline: 2px solid var(--accent-soft);
+  outline-offset: 2px;
+}
+
+/* 参加者画面はタップ操作が主。ハイライトのちらつきを抑える */
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* 曲が切り替わったときのアンビエント背景のクロスフェード */
+@keyframes tt-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@utility animate-fade-in {
+  animation: tt-fade-in 0.6s ease-out both;
+}
+
+@keyframes tt-pop {
+  0% {
+    transform: scale(1);
+  }
+  45% {
+    transform: scale(1.18);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@utility animate-pop {
+  animation: tt-pop 0.28s ease-out;
+}
+
+/* 「リクエスト募集中」の待機表示。暗所で目障りにならない程度の呼吸 */
+@keyframes tt-breathe {
+  0%,
+  100% {
+    opacity: 0.45;
+  }
+  50% {
+    opacity: 0.85;
+  }
+}
+
+@utility animate-breathe {
+  animation: tt-breathe 3.2s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

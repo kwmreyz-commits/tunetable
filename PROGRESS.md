@@ -2,111 +2,138 @@
 
 ## ステータス概要
 
-**ステップ1〜6'はすべて完了済み。v2仕様のコア機能(ホスト/参加者フロー)は一通り実装完了。**
+**v2のコア機能(ステップ1〜6')は完了済み。続けてv3として全面的な作り直しを実施。**
 
-- ステップ1・2: 完了(プロジェクト基盤・DBスキーマ、ホスト account登録/ログイン)
-- ステップ3: Spotify版は破棄。YouTube版(ステップ3')に変更し、実装完了。
-- ステップ3'(YouTube動画検索): 完了
-- ステップ4'(参加者側ページ更新): 完了
-- ステップ5'(再生ページ): 完了
-- ステップ6'(投票機能の仕上げ: レート制限・ホストのキュー削除): 完了
-- マイグレーション 0001〜0005 はすべてSupabaseに適用済み
+- ステップ1・2: 完了(プロジェクト基盤・DBスキーマ、ホストの登録/ログイン)
+- ステップ3': YouTube動画検索 — 完了
+- ステップ4': 参加者ページ — 完了(v3で全面刷新)
+- ステップ5': 再生ページ — 完了(v3で全面刷新)
+- ステップ6': レート制限・キュー削除 — 完了(v3でサーバー側に移設)
+- **v3: 体験とデザインの全面アップデート — 完了(下記)**
+- マイグレーション 0001〜0005 は適用済み。**0006 は未適用(任意)**
 
-## 完了したステップ
+> ⚠️ **現在の障害**: SupabaseプロジェクトのAPIホスト
+> `ctrrbwtmfoxrarngppfd.supabase.co` がDNSで解決できない状態
+> (パブリックリゾルバでもNXDOMAIN)。プロジェクトが一時停止されている可能性が高い。
+> Supabaseダッシュボードから再開すれば復旧する。
+> アプリ側はDB到達不可でもクラッシュせず「セッションが見つかりません」に
+> フォールバックすることを確認済み。
 
-### ステップ1: プロジェクト基盤・DBスキーマ
-- Next.js 16.2.9 (App Router, Turbopack) プロジェクト作成
-- Supabaseプロジェクト作成、`.env.local`に接続情報を設定
-- `supabase/migrations/0001_init.sql` 適用済み
-  - `stores` / `sessions` / `requests` / `votes` テーブル、RLSポリシー一式
+## v3 でやったこと
 
-### ステップ2: ホスト(店舗)アカウント登録・ログイン
-- Supabase Authを使った signup / login / logout を実装
-- `supabase/migrations/0002_store_signup_trigger.sql` 適用済み
-  - `auth.users` への insert で `public.stores` 行を自動作成するトリガー
-- サインアップ→ログイン→ダッシュボード表示→ログアウト→ルート保護まで動作確認済み
+### 1. デザインの前提を作り直した
 
-## 変更: v2仕様への方向転換
+利用環境を分析したところ、v2のUI(白背景・12px前後の文字)は
+「机の上で1人が見る」前提のもので、実際の利用場面と噛み合っていなかった。
 
-途中から方針変更。詳細は [bgm-request-app-spec-v2.md](./bgm-request-app-spec-v2.md) を参照。
+- ホスト画面 = **暗い部屋のテレビを2〜5m離れて見る**
+- 参加者画面 = **暗い部屋で片手・数秒だけ触る**
 
-- 対象をレストランのBGMリクエスト(Spotify連携・JASRAC等の制約あり)から、
-  プライベートな集まり・パーティー向けの「みんなで選ぶ音楽・動画キューアプリ」に変更
-- 音楽プロバイダをSpotify(OAuth)からYouTube Data API v3(APIキーのみ)に変更
-- 用語変更: 店舗→ホスト、お客さん/客→参加者(DBのテーブル名は変更なし)
-- ステップ3(Spotify連携・検索)は破棄し、ステップ3'(YouTube動画検索)として再実装
+この分析と、そこから導いたビジュアル言語("Dark Stage")を [DESIGN.md](./DESIGN.md) に文書化した。
+以後のUI変更はここを根拠にする。
 
-### 実施済みのクリーンアップ
-- `.env.local` / `.env.local.example`: Spotify関連の環境変数(SPOTIFY_CLIENT_ID等、ENCRYPTION_KEY)を削除し、`YOUTUBE_API_KEY`を追加
-- `next.config.ts`: 画像remotePatternsのhostnameを `i.scdn.co` → `i.ytimg.com` に変更
-- `src/app/page.tsx`: トップページの文言を参加者/ホスト向けに更新
-- `src/app/layout.tsx`: メタデータのdescriptionを更新
-- `src/app/dashboard/page.tsx`: 文言を「店舗」→「ホスト」に更新、Spotify連携への言及を削除
-- `src/types/database.ts`: `spotify_*` 列は仕様書の指示により残置(将来削除可)
+- ダークテーマ固定(ライトモードは用意しない。暗所での眩しさを避けるための積極的な選択)
+- 再生中の動画サムネイルをぼかして背景に敷く「アンビエント背景」を追加し、
+  テレビが照明の一部として機能するようにした
+- `globals.css` の `body { font-family: Arial }` が `--font-sans` を上書きしていて
+  **指定したフォントが一切効いていなかったバグを修正**。日本語はOS標準ゴシックにフォールバックさせる
 
-## 完了: ステップ3' (YouTube動画検索)
+### 2. ホスト再生ページを「TVモード」に
 
-- `supabase/migrations/0003_youtube_columns.sql` を作成
-  - `requests.video_id` / `requests.thumbnail_url`
-  - `sessions.now_playing_video_id` / `now_playing_started_at`
-  - Supabase側に適用済み
-- `src/types/database.ts` を新カラムに対応させて更新
-- `src/lib/music-provider/types.ts`: `MusicProvider` / `TrackResult` インターフェースを定義(将来Spotify等の追加にも対応できる抽象化)
-- `src/lib/music-provider/youtube.ts`: `YouTubeProvider` を実装。YouTube Data API v3 の `search.list` を呼び出し、結果を10分間メモリキャッシュ(クォータ節約)
-- `src/app/api/search/route.ts`: `/api/search?q=...` のRoute Handler。APIキーはサーバー側のみで使用し、クライアントには露出しない
-- `.env.local` に `YOUTUBE_API_KEY` 設定済み、`npm run build` 成功、`/api/search?q=test` で実際に検索結果が返ることを確認済み
+- 参加コードを `text-3xl`(拡大表示時は `text-6xl`)で表示し、部屋の向こうからでも読めるようにした
+- **QR拡大表示**ボタン。人が増えたときに全画面でQRを見せられる
+- 再生中の曲・アーティスト・リクエストした人・進捗バーを常時表示
+- **参加人数の表示**(Supabase Realtime のpresence)
+- **手動スキップ**ボタンと、キューの残り時間表示
+- リロードしても続きから流せるよう、`now_playing_started_at` から経過時間を計算して `seekTo` する
+  (v2は毎回頭出しになり、誤ってリロードすると場が止まった)
+- 再生できない動画に当たったら `onError` で自動的にキューから外して次へ進む
 
-## 完了: ステップ4' (参加者側ページ更新)
+### 3. 参加者ページを親指ファーストに
 
-- `src/app/s/[join_code]/page.tsx`: join_codeからアクティブなセッションを取得するServer Component(認証不要)
-  - セッションが見つからない場合は「セッションが見つかりません」を表示
-- `src/app/s/[join_code]/participant-view.tsx`: 参加者UI(Client Component)
-  - 現在再生中の動画(サムネイル・タイトル・アーティスト)を表示
-  - キュー一覧を投票数降順で表示、投票ボタン(トグルで投票/取消)
-  - 匿名ID(`src/lib/anonymous-id.ts`、localStorageにUUIDを保存)で投票・リクエストを識別
-  - `sessions` / `requests` / `votes` テーブルをRealtime購読し自動更新
-- `src/app/s/[join_code]/search-modal.tsx`: `/api/search`を呼び出すYouTube検索モーダル。選択した動画を`requests`にinsert(`video_id`/`thumbnail_url`を保存)
-- `supabase/migrations/0004_enable_realtime.sql`: `sessions`/`requests`/`votes`をRealtime publicationに追加(参加者ページの自動更新に必要)
-- `supabase/migrations/0005_session_store_view.sql`: `session_stores`ビューを追加
-  - `stores`テーブルはオーナー専用RLSのため、anonユーザーはホスト名を取得できない
-  - アクティブセッションに紐づく店舗名のみを限定公開するビューを作成し、`database.ts`の`Views`に型を追加
-- 検証: `tsc`/`eslint`/`npm run build`成功。テスト用のホスト・セッションを作成し、anonキーで以下を確認:
-  - リクエスト追加(insert)、投票(insert)、同一動画の重複リクエスト防止(unique制約)が正常動作
-  - 参加者ページ(`/s/TEST1234`)が正しくレンダリングされ、`session_stores`ビュー経由でホスト名も表示されることを確認
+- 主要CTA(リクエスト)を画面下部に固定
+- **投票を楽観的更新に**。通信を待たずに票が動く
+- 再生中の曲の**進捗バー**(`now_playing_started_at` を初めて活用)
+- **スキップ投票**: 再生中の曲に3票入ると自動で次へ。
+  「曲が流れ始めてから入った票」だけを数えることで、
+  キュー時代に集めた票がスキップ票に化けないようにしている(スキーマ変更なしで実現)
+- **匿名IDから決定的にニックネームと色を導出**(`おどるウサギ` など)。
+  登録を求めずに「誰が入れた曲か」を出せるようにした
+- 曲の長さ、キューの残り時間を表示
 
-## 完了: ステップ5' (再生ページ)
+### 4. リクエスト受付をサーバーに集約
 
-- `src/app/dashboard/session-actions.ts`: `startSession`(セッション開始・join_code発行)/`endSession`(セッション終了)のServer Action
-- `src/app/dashboard/page.tsx`: アクティブなセッションの有無に応じて「セッションを開始」または「参加コード表示・再生ページへのリンク・セッション終了」を表示
-- `src/app/dashboard/session/page.tsx`: アクティブセッションを取得し、QRコード用URL(`/s/[join_code]`、`headers()`からホスト名を取得して構築)を`SessionPlayer`に渡す。アクティブセッションがなければ`/dashboard`にリダイレクト
-- `src/app/dashboard/session/session-player.tsx`: 再生ページ本体(Client Component)
-  - YouTube IFrame Player APIを動的ロードして埋め込み
-  - `qrcode.react`の`QRCodeSVG`で参加者用QRコードを表示
-  - キュー一覧を投票数降順で表示(`requests`/`votes`をRealtime購読)
-  - 「再生開始」ボタン(初回はホストの操作が必要、自動再生制限への対応)
-  - `onStateChange`で`ENDED`を検知 → 投票数最多のキュー先頭を`loadVideoById`で再生し、前の動画を`played`・新しい動画を`playing`に更新、`sessions.now_playing_video_id`/`now_playing_started_at`を更新
-- `src/types/youtube.d.ts`: YouTube IFrame Player APIの型定義を追加
-- 検証: `tsc`/`eslint`/`npm run build`成功。テスト用ホスト・セッション・キュー(投票付き)を作成し、
-  - `/dashboard`にアクティブセッションの参加コード・操作ボタンが表示されることを確認
-  - `/dashboard/session`にQRコード(`/s/[join_code]`へのURL)・プレイヤー枠・再生開始ボタンが表示されることを確認
-  - ホスト権限でのrequests/sessions更新(再生進行ロジックのDB操作)がRLS上問題なく行えることを確認
-  - `session_stores`ビューがanonから正しくホスト名を返すことを確認
-  - テストデータは削除済み
+`POST /api/requests` を新設し、参加者ブラウザからの直接insertをやめた。
 
-## 完了: ステップ6' (投票機能の仕上げ)
+- レート制限(5分3曲)を**サーバー側で判定**。v2はlocalStorageを消せば回避できた
+- キュー長の上限(60)
+- ホストが設定した**NGワード**で拒否(初期スキーマにあったが未使用だった `stores.ng_words` を活用)
+- 曲名・チャンネル名・長さを**YouTubeに引き直して保存**(クライアントの申告値を信用しない)
+- **すでにキューにある曲をリクエストしたら、エラーではなく投票に振り替える**
 
-- `src/app/s/[join_code]/participant-view.tsx`: `handleSelectTrack`内でリクエスト追加前にレート制限チェックを追加
-  - 同一匿名ID(`requested_by`)・同一セッションで、過去5分以内の`requests`件数を`count: "exact", head: true`で取得
-  - 件数が3以上ならinsertせず「リクエストは5分間に3曲までです。しばらく待ってから試してください」を表示
-- `src/app/dashboard/session/session-player.tsx`: キュー一覧の各項目に「削除」ボタンを追加
-  - クリックで`requests.status`を`"removed"`に更新(`removeFromQueue`)し、`refreshQueue()`で再取得。RLSの「store owners can manage requests of own sessions」ポリシーでホストのみ更新可能
-- 検証: `tsc`/`eslint`/`npm run build`成功。devサーバーを起動し、テスト用ホスト・セッション(join_code: K8LGHP)を作成して以下を確認:
-  - 同一匿名IDで3件の`requests`をinsert後、レート制限チェックと同じ条件のカウントクエリが`3`を返すことを確認(4件目はブロックされる挙動)
-  - 別の匿名IDでは件数`0`(制限なし)であることを確認
-  - ホストのJWTで`requests.status`を`"removed"`に更新できること、更新後はキュー一覧(`status=queued`)から除外されることを確認
-  - `/s/K8LGHP`(参加者ページ)・`/dashboard/session`(再生ページ)がともに200で正常にレンダリングされ、新規追加した文言・削除ボタンがビルド済みバンドルに含まれることを確認
-  - テストデータ(テストユーザー)は削除済み
+### 5. 検索の質とクォータ
 
-## 次のステップ
+- **埋め込み再生できない動画を検索段階で除外**(`videoEmbeddable` / `videoSyndicated`)。
+  これに当たると再生が止まってパーティーが死ぬため、実質的なバグ修正
+- `regionCode=JP` / `relevanceLanguage=ja` で日本語検索の精度を改善
+- `videos.list`(1ユニット)で**再生時間**を取得。キューの残り時間表示に使う
+- **HTMLエンティティのデコードを追加**。v2は `&amp;` や `&#39;` がそのまま画面に出ていた
+- `(Official Music Video)` `【MV】` などの定型ノイズをタイトルから除去
+- Next.jsのData Cacheを使い、**インスタンスを跨いでキャッシュ**が効くようにした
+  (v2のプロセス内Mapはサーバーレスでは実質無効だった)
+- クォータ超過とAPIキー不正を切り分けてエラーを返す
 
-ステップ6'まででv2仕様のコア機能は完成。今後の拡張は[bgm-request-app-spec-v2.md](./bgm-request-app-spec-v2.md)を参照して検討する(例: NGワード/露骨表現フィルタ、セッション終了時のキュー整理、複数音楽プロバイダ対応など)。
+### 6. パーティーの振り返り(新機能)
+
+セッション終了後、同じ参加URL(`/s/[join_code]`)が**その会の記録**に変わる。
+
+- 流れた曲を得票順に表示、上位3曲にメダル
+- 参加人数・総得票数・流れた時間の集計
+- 曲を入れてくれた人のランキング
+- ホストのダッシュボードから過去のパーティーを一覧・再訪できる
+
+再生順を保持する列が無いため、「流れた順」ではなく**得票順(=盛り上がった順)**で見せている。
+順序を捏造するより素直で、振り返りとしても面白いという判断。
+
+### 7. その他の修正
+
+- **参加コード入力フォームをトップページに追加**。v2はQRしか入口が無く、
+  カメラが使えない・URLを転送された場合に参加できなかった
+- ホストダッシュボードに**設定(表示名・NGワード)**を追加
+- セッション終了時に再生中だった曲を `played` に落とし、`now_playing_*` をクリアするようにした
+- 文言を「店舗」→「ホスト」に統一(v2の方針転換が認証画面に反映されていなかった)
+- 曲送りの二重実行を防ぐロックを追加(ENDEDの二重発火・スキップ操作との競合対策)
+- Realtimeの再取得をデバウンスし、1回の変更で何度も全件取得するのを抑えた
+- 匿名IDの読み取りを `useSyncExternalStore` にして、ハイドレーション不整合と
+  カスケードレンダリングを避けた
+
+## 未適用のマイグレーション
+
+[`supabase/migrations/0006_party_upgrade.sql`](./supabase/migrations/0006_party_upgrade.sql) は
+**まだ適用していない**。v3のコードはこれが無くても正しく動く。
+
+適用すると以下が可能になる(いずれも別途コード改修が必要):
+
+| 内容 | 解決する問題 |
+|---|---|
+| `requests.played_at` | 振り返りを「実際に流れた順」で並べられる |
+| `votes.session_id` | votesのRealtime購読をセッション単位に絞れる(いまは全セッション分を受信) |
+| レート制限トリガー | APIを経由しない直接insertでも制限が効く |
+| `advance_queue()` RPC | 曲送りをDB側で直列化でき、ホストが複数タブを開いても壊れない |
+
+## 検証状況
+
+- `tsc --noEmit` / `eslint` / `npm run build` はすべて成功
+- トップページ・ログインページの描画、ダークテーマとフォント適用をブラウザで確認済み
+- `/api/search` に日本語クエリを投げ、再生時間の取得とタイトル整形が効くことを確認済み
+- DB到達不可時にクラッシュせずフォールバック表示になることを確認済み
+- **DBを伴う一連の動作(パーティー開始→リクエスト→投票→再生→終了→振り返り)は未検証**。
+  上記のSupabase停止が解消し次第、実施が必要
+
+## 次に検討すること
+
+- Supabaseプロジェクトの再開後に、通しの動作確認
+- 0006の適用と、それに合わせたコード改修
+- 参加者のニックネーム自由入力(`requests` に列を足せば可能)
+- ホスト画面への絵文字リアクション(盛り上がりの可視化。実装コストは要検討)
+- キューが空のときのフォールバック再生(YouTubeの関連動画APIが廃止済みのため要設計)

@@ -1,5 +1,14 @@
+import type { Metadata } from "next";
 import Link from "next/link";
+import { AmbientBackdrop } from "@/components/ambient-backdrop";
 import { login } from "./actions";
+
+export const metadata: Metadata = {
+  title: "ホストログイン",
+};
+
+const FIELD_CLASS =
+  "mt-1.5 block w-full rounded-xl border border-hairline bg-white/5 px-4 py-3 text-sm text-ink focus:border-accent-soft focus:outline-none";
 
 export default async function LoginPage({
   searchParams,
@@ -9,65 +18,81 @@ export default async function LoginPage({
   const { error, message } = await searchParams;
 
   return (
-    <div className="flex flex-1 flex-col items-center justify-center bg-zinc-50 px-6 py-24">
-      <div className="w-full max-w-sm">
-        <h1 className="text-center text-2xl font-bold tracking-tight text-zinc-900">
-          店舗ログイン
-        </h1>
+    <>
+      <AmbientBackdrop videoId={null} />
 
-        {message && (
-          <p className="mt-4 rounded-md bg-blue-50 px-4 py-3 text-sm text-blue-700">
-            {message}
-          </p>
-        )}
-        {error && (
-          <p className="mt-4 rounded-md bg-red-50 px-4 py-3 text-sm text-red-700">
-            {error}
-          </p>
-        )}
-
-        <form action={login} className="mt-8 space-y-4">
-          <div>
-            <label htmlFor="email" className="block text-sm font-medium text-zinc-700">
-              メールアドレス
-            </label>
-            <input
-              id="email"
-              name="email"
-              type="email"
-              required
-              autoComplete="email"
-              className="mt-1 block w-full rounded-md border border-zinc-300 px-3 py-2 text-sm shadow-sm focus:border-zinc-500 focus:outline-none"
-            />
+      <div className="flex flex-1 flex-col justify-center px-6 py-16">
+        <div className="mx-auto w-full max-w-sm">
+          <div className="text-center">
+            <Link
+              href="/"
+              className="text-[11px] font-medium tracking-[0.25em] text-ink-faint"
+            >
+              TUNETABLE
+            </Link>
+            <h1 className="mt-3 text-2xl font-bold">ホストログイン</h1>
+            <p className="mt-2 text-xs text-ink-faint">
+              参加するだけの方はログインは不要です
+            </p>
           </div>
-          <div>
-            <label htmlFor="password" className="block text-sm font-medium text-zinc-700">
-              パスワード
-            </label>
-            <input
-              id="password"
-              name="password"
-              type="password"
-              required
-              autoComplete="current-password"
-              className="mt-1 block w-full rounded-md border border-zinc-300 px-3 py-2 text-sm shadow-sm focus:border-zinc-500 focus:outline-none"
-            />
-          </div>
-          <button
-            type="submit"
-            className="w-full rounded-full bg-zinc-900 px-6 py-3 text-sm font-medium text-white"
-          >
-            ログイン
-          </button>
-        </form>
 
-        <p className="mt-6 text-center text-sm text-zinc-600">
-          アカウントをお持ちでない方は{" "}
-          <Link href="/signup" className="font-medium text-zinc-900 underline">
-            新規登録
-          </Link>
-        </p>
+          {message && (
+            <p className="mt-6 rounded-xl border border-hairline bg-surface px-4 py-3 text-sm text-ink-muted">
+              {message}
+            </p>
+          )}
+          {error && (
+            <p className="mt-6 rounded-xl bg-danger/10 px-4 py-3 text-sm text-danger">
+              {error}
+            </p>
+          )}
+
+          <form action={login} className="mt-8 space-y-5">
+            <div>
+              <label htmlFor="email" className="block text-xs font-medium text-ink-muted">
+                メールアドレス
+              </label>
+              <input
+                id="email"
+                name="email"
+                type="email"
+                required
+                autoComplete="email"
+                className={FIELD_CLASS}
+              />
+            </div>
+            <div>
+              <label
+                htmlFor="password"
+                className="block text-xs font-medium text-ink-muted"
+              >
+                パスワード
+              </label>
+              <input
+                id="password"
+                name="password"
+                type="password"
+                required
+                autoComplete="current-password"
+                className={FIELD_CLASS}
+              />
+            </div>
+            <button
+              type="submit"
+              className="w-full rounded-full bg-gradient-to-r from-accent to-accent-alt px-6 py-3.5 text-sm font-bold text-white shadow-[0_8px_28px_-8px_rgba(168,85,247,.8)]"
+            >
+              ログイン
+            </button>
+          </form>
+
+          <p className="mt-8 text-center text-xs text-ink-muted">
+            アカウントをお持ちでない方は{" "}
+            <Link href="/signup" className="font-medium text-accent-soft underline">
+              新規登録
+            </Link>
+          </p>
+        </div>
       </div>
-    </div>
+    </>
   );
 }
