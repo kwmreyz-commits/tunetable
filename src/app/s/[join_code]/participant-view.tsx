@@ -302,15 +302,30 @@ export function ParticipantView({
         : previous,
     );
 
-    const { error } = nextVoted
-      ? await supabase
-          .from("votes")
-          .insert({ request_id: playing.id, voter_anonymous_id: voterAnonymousId })
-      : await supabase
-          .from("votes")
-          .delete()
-          .eq("request_id", playing.id)
-          .eq("voter_anonymous_id", voterAnonymousId);
+    if (!nextVoted) {
+      const { error } = await supabase
+        .from("votes")
+        .delete()
+        .eq("request_id", playing.id)
+        .eq("voter_anonymous_id", voterAnonymousId);
+      if (error) notify("スキップ投票を取り消せませんでした");
+      scheduleRefresh();
+      return;
+    }
+
+    // votes は (request_id, voter_anonymous_id) が一意なので、キューにいる間に
+    // この曲へ投票していた人はそのままではinsertできない。
+    // スキップ票かどうかは created_at が再生開始より後かで判定しているため、
+    // 一度消してから入れ直して票の時刻を更新する(総投票数は変わらない)。
+    await supabase
+      .from("votes")
+      .delete()
+      .eq("request_id", playing.id)
+      .eq("voter_anonymous_id", voterAnonymousId);
+
+    const { error } = await supabase
+      .from("votes")
+      .insert({ request_id: playing.id, voter_anonymous_id: voterAnonymousId });
 
     if (error) notify("スキップ投票を反映できませんでした");
     scheduleRefresh();

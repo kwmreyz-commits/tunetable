@@ -123,13 +123,16 @@ export async function POST(request: NextRequest) {
         message: "その動画はいま再生中です",
       });
     }
-    await supabase
+    const { error: voteError } = await supabase
       .from("votes")
       .insert({ request_id: existing.id, voter_anonymous_id: anonymousId });
     return NextResponse.json({
       deduped: true,
       votedRequestId: existing.id,
-      message: "すでにキューにあったので、代わりに投票しました",
+      message:
+        voteError?.code === "23505"
+          ? "その曲はすでにキューにあり、あなたも投票済みです"
+          : "すでにキューにあったので、代わりに投票しました",
     });
   }
 
