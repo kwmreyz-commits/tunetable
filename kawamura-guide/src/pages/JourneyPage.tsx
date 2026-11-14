@@ -38,7 +38,7 @@ function EstimateNote({ className = "" }: { className?: string }) {
 // スマホ用：4段階と費用を短くまとめた早見
 function Overview() {
   return (
-    <ol className="lg:hidden" aria-label="道のりの早見">
+    <ol className="lg:hidden print:hidden" aria-label="道のりの早見">
       {stages.map((s) => (
         <li key={s.id}>
           <a
@@ -113,11 +113,11 @@ function StageCard({ stage }: { stage: Stage }) {
 // 各段階の注意点（カードを短く保つため、道のりの下にまとめる）
 function Cautions() {
   return (
-    <section aria-labelledby="cautions-h" className="mt-12">
+    <section aria-labelledby="cautions-h" className="mt-12 print:mt-6">
       <h2 id="cautions-h" className="text-[1.35rem] font-bold">
         それぞれの段階でのご注意
       </h2>
-      <ul className="mt-4 space-y-3">
+      <ul className="mt-4 space-y-3 print:space-y-1">
         {stages.map((s) => (
           <li key={s.id} className="card flex gap-3 rounded-2xl border border-line bg-card p-4">
             <StepBadge no={s.no} />
@@ -136,7 +136,7 @@ function Arrow() {
   return (
     <div
       aria-hidden="true"
-      className="flex items-center justify-center text-[1.6rem] leading-none text-main"
+      className="flex items-center justify-center text-[1.6rem] leading-none text-main print:hidden"
     >
       <span className="lg:hidden">↓</span>
       <span className="hidden lg:inline">→</span>
@@ -147,18 +147,18 @@ function Arrow() {
 function Journey() {
   return (
     <div className="mt-6 lg:mt-0">
-      <h2 className="mb-3 text-[1.2rem] font-bold lg:sr-only">
+      <h2 className="mb-3 text-[1.2rem] font-bold lg:sr-only print:hidden">
         各段階のくわしい内容
       </h2>
-      <div className="flex flex-col gap-2 lg:grid lg:grid-cols-[1fr_auto_1fr_auto_1fr_auto_1fr] lg:items-stretch">
+      <div className="flex flex-col gap-2 lg:grid lg:grid-cols-[1fr_auto_1fr_auto_1fr_auto_1fr] lg:items-stretch print:grid print:grid-cols-2 print:gap-3">
         {stages.map((s, i) => (
           <FragmentWithArrow key={s.id} last={i === stages.length - 1}>
             <StageCard stage={s} />
           </FragmentWithArrow>
         ))}
       </div>
-      <div className="mt-2 hidden lg:block">
-        <p aria-hidden="true" className="text-center leading-none text-main">
+      <div className="mt-2 hidden lg:block print:block">
+        <p aria-hidden="true" className="text-center leading-none text-main print:hidden">
           ▲
         </p>
         <EstimateNote className="mx-auto max-w-3xl text-[1.1rem]" />
@@ -185,14 +185,14 @@ function FragmentWithArrow({
 function ModelCases() {
   if (shownCases.length === 0) return null;
   return (
-    <section aria-labelledby="cases-h" className="mt-12">
+    <section aria-labelledby="cases-h" className="mt-12 print:mt-6">
       <h2 id="cases-h" className="text-[1.35rem] font-bold">
         費用の例（モデルケース）
       </h2>
       <p className="mt-1 text-sub">
         あくまで一例です。実際の内容と費用は、デンタルドックのあとにお一人ずつご相談します。
       </p>
-      <div className="mt-4 grid gap-4 lg:grid-cols-3">
+      <div className="mt-4 grid gap-4 lg:grid-cols-3 print:grid-cols-3 print:gap-2">
         {shownCases.map((c) => (
           <article key={c.id} className="card rounded-2xl border border-line bg-card p-5">
             {!c.confirmed && (
@@ -224,7 +224,7 @@ function Contact() {
   const btn =
     "flex min-h-14 flex-1 items-center justify-center rounded-xl px-5 py-3 text-center text-[1.1rem] font-bold no-underline";
   return (
-    <section aria-labelledby="contact-h" className="mt-12">
+    <section aria-labelledby="contact-h" className="mt-12 print:mt-6">
       <h2 id="contact-h" className="text-[1.35rem] font-bold">
         ご予約・お問い合わせ
       </h2>

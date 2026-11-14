@@ -1,10 +1,14 @@
 import { useEffect, useState } from "react";
 import { SampleBanner } from "../components/SampleBanner";
+import { PlanPrint } from "../components/PlanPrint";
+import { TakeHome } from "../components/TakeHome";
 import { clinic } from "../data/clinic";
+import { stages } from "../data/journey";
 import { phases, settings } from "../data/settings";
 import { treatments } from "../data/treatments";
 import type { Phase } from "../data/types";
 import { decodePlan, findTreatment, mid, moneyText, summarize } from "../lib/plan";
+import { planUrl, qrSvg } from "../lib/share";
 
 // 色だけに頼らないよう、段階ごとに濃さと模様を変え、必ず ①②③ と金額を添える
 const phaseBar: Record<Phase, string> = {
@@ -22,6 +26,18 @@ export default function PlanViewPage() {
   }, []);
 
   const plan = decodePlan(hash, treatments);
+
+  // QRコード（この画面と同じ内容を開くリンク）
+  const [qr, setQr] = useState("");
+  useEffect(() => {
+    const p = decodePlan(hash, treatments);
+    if (!p) return;
+    let alive = true;
+    qrSvg(planUrl(window.location.origin, p)).then((svg) => alive && setQr(svg));
+    return () => {
+      alive = false;
+    };
+  }, [hash]);
   if (!plan || plan.items.length === 0) {
     return (
       <main className="mx-auto max-w-2xl px-4 py-10">
@@ -53,13 +69,42 @@ export default function PlanViewPage() {
   return (
     <>
       {showSample && <SampleBanner />}
-      <main className="mx-auto max-w-[900px] px-4 pb-16 pt-5">
+      <main className="mx-auto max-w-[900px] px-4 pb-32 pt-5 print:hidden">
         <header>
           <p className="text-sub">
             {clinic.name}　作成日 {plan.createdAt}
           </p>
           <h1 className="text-[1.5rem] font-bold leading-snug">あなたの治療計画</h1>
+          <p className="mt-1">
+            デンタルドックの結果をもとにした、これからの治療の計画と費用の目安です。
+          </p>
         </header>
+
+        {/* 道のりの中で、いまどこにいるか */}
+        <ol aria-label="治療の道のり" className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
+          {stages.map((st) => {
+            const state = st.no < 3 ? "すみ" : st.no === 3 ? "この計画" : "治療のあと";
+            return (
+              <li
+                key={st.id}
+                aria-current={st.no === 3 ? "step" : undefined}
+                className={`rounded-xl border-2 px-3 py-2 leading-snug ${
+                  st.no === 3
+                    ? "border-main bg-main-soft font-bold text-main-dark"
+                    : "border-line bg-card text-sub"
+                }`}
+              >
+                <span className="block">
+                  {st.no}. {st.name}
+                </span>
+                <span className="block">
+                  {st.no < 3 ? "✓ " : st.no === 3 ? "▶ " : ""}
+                  {state}
+                </span>
+              </li>
+            );
+          })}
+        </ol>
 
         {/* 1. 合計と期間 */}
         <section aria-label="合計と期間" className="card mt-4 rounded-2xl border-2 border-main bg-card p-5">
@@ -260,7 +305,13 @@ export default function PlanViewPage() {
         )}
 
         {/* 6. 注記 */}
-        <footer className="mt-10 border-t border-line pt-4">
+        <p className="mt-10 rounded-xl border-2 border-main bg-main-soft px-4 py-3 text-center font-bold text-main-dark">
+          ご家族とも相談して、納得されてから治療に進みます。
+          <br />
+          わからないことは、何でもお尋ねください。
+        </p>
+
+        <footer className="mt-6 border-t border-line pt-4">
           <p className="font-bold">
             この内容は相談用の概算です。正式な見積書は医院でお渡しします。
           </p>
@@ -280,6 +331,8 @@ export default function PlanViewPage() {
           </p>
         </footer>
       </main>
+      <PlanPrint plan={plan} summary={s} maint={maint} qr={qr} />
+      <TakeHome qr={qr} />
     </>
   );
 }
