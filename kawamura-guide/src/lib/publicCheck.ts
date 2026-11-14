@@ -12,9 +12,15 @@ export function visibleModelCases(
 }
 
 // 「サンプル金額です」の帯を出すかどうか
-export function hasSample(stages: Stage[], shownCases: ModelCase[]): boolean {
+export function hasSample(
+  stages: Stage[],
+  shownCases: ModelCase[],
+  dockConfirmed: boolean,
+): boolean {
   return (
-    stages.some((s) => !s.confirmed) || shownCases.some((c) => !c.confirmed)
+    !dockConfirmed ||
+    stages.some((s) => !s.confirmed) ||
+    shownCases.some((c) => !c.confirmed)
   );
 }
 
@@ -24,13 +30,17 @@ export function publicProblems(
   cases: ModelCase[],
   clinic: Clinic,
   treatments: Treatment[],
+  dockConfirmed: boolean,
 ): string[] {
   const out: string[] = [];
-  for (const t of treatments) {
-    if (!t.confirmed) out.push(`料金マスター「${t.name}」が未確認です`);
-    if (!t.risks.trim()) out.push(`料金マスター「${t.name}」のリスク・注意点が空です`);
-    if (!(t.priceMin > 0) || t.priceMax < t.priceMin)
-      out.push(`料金マスター「${t.name}」の金額がおかしいです`);
+  if (!dockConfirmed) out.push("デンタルドックの説明文が未確認です（src/data/dock.ts）");
+  // 「扱わない」にした治療は調べない
+  for (const t of treatments.filter((t) => t.enabled)) {
+    if (!t.confirmed) out.push(`料金メニュー「${t.name}」が未確認です`);
+    if (!t.name.trim()) out.push("料金メニューに名前のない治療があります");
+    if (!t.risks.trim()) out.push(`料金メニュー「${t.name}」のリスク・注意点が空です`);
+    if (t.variants.some((v) => Object.values(v.prices).length === 0))
+      out.push(`料金メニュー「${t.name}」に値段のない種類があります`);
   }
   for (const s of stages) {
     if (!s.confirmed) out.push(`道のり「${s.name}」が未確認です`);

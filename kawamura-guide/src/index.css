@@ -11,6 +11,9 @@
   --color-main-dark: #234539;
   --color-main-mid: #4a7667;
   --color-main-soft: #e3ede8;
+  --color-pick: #ffd166;
+  --color-tooth-line: #9aa39e;
+  --color-danger: #a23b2a;
   --color-warn: #8a5a00;
   --color-warn-soft: #fff3d6;
   --font-sans: "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Noto Sans JP",
@@ -52,6 +55,10 @@ body {
   .avoid-break {
     break-inside: avoid;
   }
+  h2,
+  h3 {
+    break-after: avoid;
+  }
   /* 計画の印刷専用レイアウト */
   .plan-print {
     font-size: 10.5pt;
@@ -74,7 +81,7 @@ body {
   .plan-print tr {
     break-inside: avoid;
   }
-  .plan-print svg {
+  .plan-print footer svg {
     width: 100%;
     height: 100%;
   }

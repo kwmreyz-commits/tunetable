@@ -1,0 +1,119 @@
+{
+  "version": 1,
+  "segments": [
+    { "id": "adult", "name": "大人" },
+    { "id": "child", "name": "子ども" }
+  ],
+  "findings": [
+    { "id": "caries", "name": "むし歯", "note": "歯がとけて、穴があいている状態です。" },
+    { "id": "root", "name": "歯の根の病気", "note": "歯の根の先に、炎症やうみがある状態です。" },
+    { "id": "perio", "name": "歯ぐきの病気（歯周病）", "note": "歯を支える歯ぐきや骨が、弱っている状態です。" },
+    { "id": "missing", "name": "歯がない", "note": "歯を失ったままになっている状態です。" },
+    { "id": "old-work", "name": "詰め物・かぶせ物の不具合", "note": "すき間や欠けがあり、中でむし歯が進みやすい状態です。" },
+    { "id": "crack", "name": "歯の欠け・ひび", "note": "歯が欠けたり、ひびが入っている状態です。" },
+    { "id": "bite", "name": "かみ合わせの問題", "note": "一部の歯に、強い力がかかっている状態です。" },
+    { "id": "alignment", "name": "歯ならび", "note": "歯ならびが原因で、汚れが残りやすい状態です。" },
+    { "id": "plaque", "name": "みがき残し", "note": "汚れ（プラーク）が残りやすい状態です。" }
+  ],
+  "treatments": [
+    {
+      "id": "plaque-control", "name": "歯みがきの練習", "formalName": "プラークコントロール指導",
+      "purpose": "毎日の歯みがきで汚れ（プラーク）を落とせるように、みがき方を一緒に練習します。",
+      "risks": "効果は毎日のお手入れによって変わります。",
+      "visits": "1〜3回", "kind": "mouth", "unit": "1回",
+      "variants": [{ "id": "std", "name": "", "prices": { "adult": 5500, "child": 3300 } }],
+      "enabled": true, "confirmed": false
+    },
+    {
+      "id": "perio", "name": "歯ぐきの治療", "formalName": "歯周病治療",
+      "purpose": "歯ぐきの中の汚れや歯石を取り、歯を支える歯ぐきと骨の状態を整えます。",
+      "risks": "治療のあと、歯がしみたり、歯ぐきが下がって見えることがあります。状態によっては再び治療が必要になります。",
+      "visits": "2〜6回", "kind": "mouth", "unit": "1回",
+      "variants": [{ "id": "std", "name": "", "prices": { "adult": 22000 } }],
+      "enabled": true, "confirmed": false
+    },
+    {
+      "id": "root-canal", "name": "歯の根の治療", "formalName": "根管治療・神経の治療",
+      "purpose": "歯の根の中をきれいにして、歯を残せるようにします。",
+      "risks": "治療のあとに痛みや腫れが出ることがあります。歯の状態によっては、残せない場合があります。",
+      "visits": "2〜4回", "kind": "perTooth", "unit": "一式",
+      "variants": [
+        { "id": "front", "name": "前歯", "prices": { "adult": 77000 } },
+        { "id": "back", "name": "奥歯", "prices": { "adult": 132000 } }
+      ],
+      "enabled": true, "confirmed": false
+    },
+    {
+      "id": "filling", "name": "詰め物", "formalName": "インレー・充填",
+      "purpose": "むし歯などで失った部分を、詰め物でおぎないます。",
+      "risks": "欠けたり外れたりすることがあります。治療のあと、しみることがあります。",
+      "visits": "1〜2回", "kind": "perTooth", "unit": "一式",
+      "variants": [
+        { "id": "resin", "name": "白い樹脂", "prices": { "adult": 22000, "child": 11000 } },
+        { "id": "ceramic", "name": "セラミック", "prices": { "adult": 66000 } },
+        { "id": "gold", "name": "ゴールド", "prices": { "adult": 88000 } }
+      ],
+      "enabled": true, "confirmed": false
+    },
+    {
+      "id": "crown", "name": "かぶせ物", "formalName": "クラウン",
+      "purpose": "大きく失った歯の形を、かぶせ物で回復します。",
+      "risks": "歯を削る必要があります。欠けたり外れたりすることがあります。",
+      "visits": "2〜3回", "kind": "perTooth", "unit": "一式",
+      "variants": [
+        { "id": "ceramic", "name": "セラミック", "prices": { "adult": 165000 } },
+        { "id": "zirconia", "name": "ジルコニア", "prices": { "adult": 143000 } },
+        { "id": "gold", "name": "ゴールド", "prices": { "adult": 176000 } }
+      ],
+      "enabled": true, "confirmed": false
+    },
+    {
+      "id": "implant", "name": "インプラント", "formalName": "人工歯根",
+      "purpose": "失った歯のところに人工の根を入れ、その上に歯を作ります。",
+      "risks": "手術が必要で、痛み・腫れ・出血・しびれが出ることがあります。骨や全身の状態によっては行えません。治療後もお手入れが必要です。",
+      "visits": "5〜8回", "kind": "perTooth", "unit": "一式",
+      "variants": [{ "id": "std", "name": "", "prices": { "adult": 495000 } }],
+      "enabled": true, "confirmed": false
+    },
+    {
+      "id": "denture", "name": "入れ歯", "formalName": "義歯",
+      "purpose": "失った歯を、取り外しのできる入れ歯でおぎないます。",
+      "risks": "慣れるまで違和感や話しにくさが出ることがあります。使ううちに調整や作り直しが必要になります。",
+      "visits": "4〜6回", "kind": "teethSet", "unit": "一式",
+      "variants": [
+        { "id": "partial", "name": "部分入れ歯", "prices": { "adult": 330000 } },
+        { "id": "full", "name": "総入れ歯", "prices": { "adult": 660000 } }
+      ],
+      "enabled": true, "confirmed": false
+    },
+    {
+      "id": "occlusion", "name": "かみ合わせの治療", "formalName": "咬合治療",
+      "purpose": "上下の歯の当たり方を整え、歯やあごにかかる負担を減らします。",
+      "risks": "慣れるまで違和感が出ることがあります。調整に回数がかかる場合があります。",
+      "visits": "2〜6回", "kind": "mouth", "unit": "一式",
+      "variants": [{ "id": "std", "name": "", "prices": { "adult": 165000 } }],
+      "enabled": true, "confirmed": false
+    },
+    {
+      "id": "ortho", "name": "矯正", "formalName": "矯正歯科治療",
+      "purpose": "歯ならびとかみ合わせを整えます。",
+      "risks": "痛みや違和感が出ることがあります。歯の根が短くなる、歯ぐきが下がる、治療後に後戻りすることがあります。期間には個人差があります。",
+      "visits": "月1回ほど（1〜3年）", "kind": "mouth", "unit": "一式",
+      "variants": [
+        { "id": "full", "name": "全体", "prices": { "adult": 990000, "child": 440000 } },
+        { "id": "partial", "name": "部分", "prices": { "adult": 440000 } }
+      ],
+      "enabled": true, "confirmed": false
+    },
+    {
+      "id": "maintenance", "name": "メンテナンス", "formalName": "定期検診",
+      "purpose": "治療のあとの状態を保つため、お口の中を確認し、必要なお手入れをします。",
+      "risks": "定期検診を受けていても、あらためて治療が必要になることがあります。",
+      "visits": "半年に一度", "kind": "mouth", "unit": "1回",
+      "variants": [{ "id": "std", "name": "", "prices": { "adult": 16500, "child": 8800 } }],
+      "enabled": true, "confirmed": false
+    }
+  ],
+  "payment": { "lumpSum": true, "perPhase": true, "installment": false },
+  "maintenance": { "treatmentId": "maintenance", "timesPerYear": 2 }
+}

@@ -26,14 +26,14 @@ export function TakeHome({ qr }: { qr: string }) {
         onClick={(e) => e.target === ref.current && ref.current?.close()}
       >
         <h2 id="takehome-h" className="text-[1.35rem] font-bold">
-          この計画を持ち帰る
+          この見積もりを持ち帰る
         </h2>
 
         <h3 className="mt-4 font-bold">① スマホで持ち帰る</h3>
         <p>スマホのカメラをQRコードに向けると、この画面と同じ内容が開きます。</p>
         <div
           role="img"
-          aria-label="この計画を開くQRコード"
+          aria-label="この見積もりを開くQRコード"
           className="mx-auto mt-3 w-[min(60vw,13rem)] rounded-xl border border-line bg-white p-2"
           dangerouslySetInnerHTML={{ __html: qr }}
         />
@@ -52,7 +52,7 @@ export function TakeHome({ qr }: { qr: string }) {
         </button>
 
         <p className="mt-4 leading-normal text-sub">
-          この計画は医院にもインターネット上にも保存されません。内容はQRコード（リンク）の中に入っています。お名前や連絡先は入っていません。
+          この見積もりは医院にもインターネット上にも保存されません。内容はQRコード（リンク）の中に入っています。お名前や連絡先は入っていません。
         </p>
         <button
           type="button"

@@ -25,7 +25,7 @@ export function CostBar({ cost, scaleMax }: { cost: Cost; scaleMax: number }) {
           }}
         />
       </div>
-      <div className="mt-1 flex justify-between text-[0.9rem] text-sub">
+      <div className="mt-1 flex justify-between text-[1rem] text-sub">
         <span>0円</span>
         <span>{yen(scaleMax)}</span>
       </div>

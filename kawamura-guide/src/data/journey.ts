@@ -32,10 +32,7 @@ export const stages: Stage[] = [
     name: "健康治療",
     what: "ドックで決めた計画に沿って、治療を進めます。内容・回数・費用は、お一人おひとり異なります。",
     visits: "計画によって異なります",
-    cost: {
-      kind: "text",
-      text: "ドックのあとに、計画と見積もりをお出しします",
-    },
+    cost: { kind: "text", text: "ドックのあとにお見積もり" },
     risks:
       "治療の結果には個人差があります。それぞれの治療の注意点は、計画のご相談のときに、内容ごとにご説明します。",
     confirmed: true,
@@ -46,7 +43,7 @@ export const stages: Stage[] = [
     name: "メンテナンス",
     what: "治療のあとの状態を保つための定期検診です。お口の中を確認し、必要なお手入れをします。",
     visits: "半年に一度",
-    cost: { kind: "text", text: "費用は医院でご案内します" },
+    cost: { kind: "text", text: "医院でご案内します" },
     risks:
       "定期検診を受けていても、お口の状態が変わり、あらためて治療が必要になることがあります。",
     confirmed: true,
