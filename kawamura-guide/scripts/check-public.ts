@@ -2,9 +2,10 @@
 import { clinic } from "../src/data/clinic";
 import { stages } from "../src/data/journey";
 import { modelCases } from "../src/data/modelCases";
+import { treatments } from "../src/data/treatments";
 import { publicProblems } from "../src/lib/publicCheck";
 
-const problems = publicProblems(stages, modelCases, clinic);
+const problems = publicProblems(stages, modelCases, clinic, treatments);
 const hidden = modelCases.filter((c) => !c.confirmed);
 
 if (hidden.length > 0) {

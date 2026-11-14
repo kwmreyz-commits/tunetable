@@ -2,10 +2,12 @@ import { describe, expect, it } from "vitest";
 import { clinic } from "../data/clinic";
 import { stages } from "../data/journey";
 import { modelCases } from "../data/modelCases";
+import { treatments } from "../data/treatments";
 import type { Clinic } from "../data/types";
 import { costText } from "./format";
 import { hasSample, publicProblems, visibleModelCases } from "./publicCheck";
 
+const okTreatments = treatments.map((t) => ({ ...t, confirmed: true }));
 const fullClinic: Clinic = {
   ...clinic,
   lineUrl: "https://example.com/line",
@@ -35,20 +37,28 @@ describe("公開の安全装置", () => {
     expect(hasSample(stages, visibleModelCases(cases, false))).toBe(true);
   });
   it("医院情報がそろっていれば公開できる", () => {
-    expect(publicProblems(stages, modelCases, fullClinic)).toEqual([]);
+    expect(publicProblems(stages, modelCases, fullClinic, okTreatments)).toEqual([]);
   });
   it("医院情報が空だと止まる", () => {
-    const p = publicProblems(stages, modelCases, { ...fullClinic, address: "" });
+    const p = publicProblems(stages, modelCases, { ...fullClinic, address: "" }, okTreatments);
     expect(p).toContain("住所が空です");
   });
   it("未確認の段階があると止まる", () => {
     const bad = [{ ...stages[0], confirmed: false }, ...stages.slice(1)];
-    expect(publicProblems(bad, [], fullClinic).length).toBe(1);
+    expect(publicProblems(bad, [], fullClinic, okTreatments).length).toBe(1);
   });
   it("注意点が空だと止まる", () => {
     const bad = [{ ...stages[0], risks: " " }, ...stages.slice(1)];
-    expect(publicProblems(bad, [], fullClinic).length).toBe(1);
+    expect(publicProblems(bad, [], fullClinic, okTreatments).length).toBe(1);
     const badCase = [{ ...modelCases[0], confirmed: true, risks: "" }];
-    expect(publicProblems(stages, badCase, fullClinic).length).toBe(1);
+    expect(publicProblems(stages, badCase, fullClinic, okTreatments).length).toBe(1);
+  });
+  it("料金マスターに未確認があると止まる", () => {
+    const p = publicProblems(stages, [], fullClinic, treatments);
+    expect(p.length).toBe(treatments.filter((t) => !t.confirmed).length);
+  });
+  it("料金マスターのリスクが空だと止まる", () => {
+    const bad = [{ ...okTreatments[0], risks: "" }];
+    expect(publicProblems(stages, [], fullClinic, bad).length).toBe(1);
   });
 });

@@ -1,4 +1,4 @@
-import type { Clinic, ModelCase, Stage } from "../data/types";
+import type { Clinic, ModelCase, Stage, Treatment } from "../data/types";
 
 // 公開版かどうか（vite build --mode public）
 export const isPublicBuild = () => import.meta.env?.MODE === "public";
@@ -23,8 +23,15 @@ export function publicProblems(
   stages: Stage[],
   cases: ModelCase[],
   clinic: Clinic,
+  treatments: Treatment[],
 ): string[] {
   const out: string[] = [];
+  for (const t of treatments) {
+    if (!t.confirmed) out.push(`料金マスター「${t.name}」が未確認です`);
+    if (!t.risks.trim()) out.push(`料金マスター「${t.name}」のリスク・注意点が空です`);
+    if (!(t.priceMin > 0) || t.priceMax < t.priceMin)
+      out.push(`料金マスター「${t.name}」の金額がおかしいです`);
+  }
   for (const s of stages) {
     if (!s.confirmed) out.push(`道のり「${s.name}」が未確認です`);
     if (!s.risks.trim()) out.push(`道のり「${s.name}」の注意点が空です`);
