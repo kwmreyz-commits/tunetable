@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // 別プロジェクト（川村歯科ガイド）。tunetable とは無関係。
+    "kawamura-guide/**",
   ]),
 ]);
 
