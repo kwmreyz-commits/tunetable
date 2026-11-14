@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:phone": "vite --host",
     "build": "tsc --noEmit && vite build",
     "check:public": "tsx scripts/check-public.ts",
     "build:public": "tsx scripts/check-public.ts && tsc --noEmit && vite build --mode public",

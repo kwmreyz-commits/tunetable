@@ -9,6 +9,7 @@ tunetable とは**別のプロジェクト**です（一時的に同じリポジ
 cd kawamura-guide
 npm install
 npm run dev          # 確認用（サンプルも表示）
+npm run dev:phone    # 同じWi-Fiのスマホからも見られる（Network: に出るURLをスマホで開く）
 npm test             # テスト
 npm run build:public # 公開用ビルド。未確認・未入力があると止まる → dist/ を Cloudflare Pages へ
 ```
@@ -33,3 +34,14 @@ npm run build:public # 公開用ビルド。未確認・未入力があると止
 - [x] Phase 1：道のりページ
 - [x] Phase 2：料金マスター＋計画ビルダー（`/plan/new`）＋あなたの計画（`/plan#データ`）
 - [x] Phase 3：QRコード・印刷（「あなたの計画」の「持ち帰る」ボタン）
+
+## スマホで見られるURLを作る（Cloudflare Pages）
+
+1. Cloudflare にログイン → Workers & Pages → 作成 → Pages → Git に接続
+2. リポジトリ `tunetable` を選ぶ
+3. 設定
+   - 本番ブランチ：`ccr-883723d4-gp9ln2`（いまの作業ブランチ）
+   - ルートディレクトリ：`kawamura-guide`
+   - ビルドコマンド：`npm run build`（確認用。サンプル金額の帯つき・検索に出ない）
+   - 出力ディレクトリ：`dist`
+4. 金額と医院情報が確定したら、ビルドコマンドを `npm run build:public` に変える
