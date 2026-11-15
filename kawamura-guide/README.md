@@ -53,13 +53,13 @@ npm run build:public # 公開用ビルド。未確認・未入力があると止
 氏名・生年月日・連絡先の入力欄はありません。見積もりの中身は URL の `#` 以降に入り、
 サーバーにも端末にも保存されません（保存されるのは料金の設定だけです）。
 
-## スマホで見られるURLを作る（Cloudflare Pages）
+## スマホで見られるURLを作る（Cloudflare Workers）
 
-1. Cloudflare にログイン → Workers & Pages → 作成 → Pages → Git に接続
-2. リポジトリ `tunetable` を選ぶ
-3. 設定
-   - 本番ブランチ：`ccr-883723d4-gp9ln2`（いまの作業ブランチ）
-   - ルートディレクトリ：`kawamura-guide`
-   - ビルドコマンド：`npm run build`（確認用。サンプルの帯つき・検索に出ない）
-   - 出力ディレクトリ：`dist`
-4. 金額と医院情報が確定したら、ビルドコマンドを `npm run build:public` に変える
+Cloudflare の Workers & Pages で、GitHub の `tunetable` につないで公開しています。
+
+- Root directory：`kawamura-guide`
+- Build command：`npm run build`（確認用。サンプルの帯つき・検索に出ない）
+- Deploy command：`npx wrangler deploy`（設定は `wrangler.jsonc`）
+- Production branch：`ccr-883723d4-gp9ln2`（Settings → Build → Branch control）
+- このブランチに変更を送るたびに、自動で作り直される
+- 金額と医院情報が確定したら、Build command を `npm run build:public` に変える
