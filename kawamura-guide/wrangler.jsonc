@@ -1,0 +1,10 @@
+// Cloudflare Workers で、ビルドした dist/ をそのまま配る設定
+{
+  "name": "kawamura-guide",
+  "compatibility_date": "2026-10-01",
+  "assets": {
+    "directory": "./dist",
+    // /plan/new や /settings を開いたときも、アプリの画面を返す
+    "not_found_handling": "single-page-application"
+  }
+}
